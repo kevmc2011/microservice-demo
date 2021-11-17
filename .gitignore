@@ -1,0 +1,8 @@
+customer-service/target
+order-service/target
+gateway-service/target
+discovery-service/target
+.project
+.settings/
+.classpath
+.factorypath

@@ -1,0 +1,66 @@
+version: "3"
+services:
+  discovery-service:
+    image: discovery-service
+    ports:
+      - 8761:8761
+
+  customer-database:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=customer    
+    expose:
+      - 3306
+    volumes:
+      - db:/var/lib/mysql
+
+  order-database:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=order
+    expose:
+      - 3306
+    volumes:
+      - db2:/var/lib/mysql
+
+  customer-service:
+    image: customer-service
+    environment:
+      - EUREKA_SERVER=http://discovery-service:8761/eureka
+      - MYSQL_HOST=customer-database
+      - REDIS_HOST=redis-server
+    depends_on:
+      - discovery-service
+      - customer-database
+    expose:
+      - 8080
+
+  order-service:
+    image: order-service
+    environment:
+      - EUREKA_SERVER=http://discovery-service:8761/eureka
+      - MYSQL_HOST=order-database
+    depends_on:
+      - discovery-service
+      - order-database
+    expose:
+      - 8080
+
+  gateway-service:
+    image: gateway-service
+    environment:
+      - EUREKA_SERVER=http://discovery-service:8761/eureka
+    depends_on:
+      - discovery-service
+    ports:
+      - 8080:8080
+
+  redis-server:
+    image: redis
+    ports:
+      - 6379:6379
+volumes:
+  db:
+  db2:
