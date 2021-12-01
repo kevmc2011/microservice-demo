@@ -1,5 +1,6 @@
 package com.kmc.microservices.orderservice.domain;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -9,12 +10,20 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import lombok.Data;
+import com.kmc.microservices.orderservice.projections.ProductDto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
 @Entity
 @Table(name = "product")
-public class Product {
+public class Product implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,4 +35,18 @@ public class Product {
 
 	@ManyToMany(mappedBy = "products")
 	private List<Order> orders;
+
+	public static ProductDto convertToDto(Product product) {
+		return ProductDto.builder()
+				.serial(product.getSerial())
+				.sku(product.getSku())
+				.build();
+	}
+
+	public static Product convertToEntity(ProductDto productDto) {
+		return Product.builder()
+				.sku(productDto.getSku())
+				.serial(productDto.getSerial())
+				.build();
+	}
 }

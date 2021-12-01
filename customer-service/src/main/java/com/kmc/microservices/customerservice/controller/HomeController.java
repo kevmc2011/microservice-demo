@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kmc.microservices.customerservice.clients.DumbOrdersClient;
 import com.kmc.microservices.customerservice.clients.OrdersClient;
 import com.kmc.microservices.customerservice.domain.Customer;
 import com.kmc.microservices.customerservice.dto.CustomerDto;
+import com.kmc.microservices.customerservice.dto.ServerInfoDto;
 import com.kmc.microservices.customerservice.repository.CustomerRepository;
+import com.netflix.appinfo.ApplicationInfoManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,18 +27,32 @@ public class HomeController {
 	private CustomerRepository customerRepository;
 
 	@Autowired
+	private DumbOrdersClient dumbOrdersClient;
+
+	@Autowired
 	private OrdersClient ordersClient;
+
+	@Autowired
+	private ApplicationInfoManager applicationInfoManager;
 
 	@GetMapping
 	public List<Customer> getAllCustomers() {
 		return customerRepository.findAll();
 	}
 
+	@GetMapping("/{customerId}/resilient")
+	public CustomerDto getCustomerDetailsResilient(@PathVariable Long customerId) {
+		return customerRepository
+			.findById(customerId)
+			.map(this::convertToDto)
+			.orElse(new CustomerDto());
+	}
+
 	@GetMapping("/{customerId}")
 	public CustomerDto getCustomerDetails(@PathVariable Long customerId) {
 		return customerRepository
 			.findById(customerId)
-			.map(this::convertToDto)
+			.map(this::convertToDumbDto)
 			.orElse(new CustomerDto());
 	}
 
@@ -45,10 +62,24 @@ public class HomeController {
 		return customerRepository.save(customer);
 	}
 
+	@GetMapping("/info")
+	public ServerInfoDto getInfo() {
+		return ServerInfoDto.builder()
+				.address(applicationInfoManager.getInfo().getIPAddr())
+				.build();
+	}
+
 	private CustomerDto convertToDto(Customer customer) {
 		return CustomerDto.builder()
 				.name(customer.getName())
 				.orders(ordersClient.getOrders(customer.getId()))
+				.build();
+	}
+
+	private CustomerDto convertToDumbDto(Customer customer) {
+		return CustomerDto.builder()
+				.name(customer.getName())
+				.orders(dumbOrdersClient.getOrders(customer.getId()))
 				.build();
 	}
 }

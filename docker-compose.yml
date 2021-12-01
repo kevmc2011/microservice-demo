@@ -34,6 +34,7 @@ services:
     depends_on:
       - discovery-service
       - customer-database
+      - redis-server
     expose:
       - 8080
 
@@ -42,9 +43,11 @@ services:
     environment:
       - EUREKA_SERVER=http://discovery-service:8761/eureka
       - MYSQL_HOST=order-database
+      - REDIS_HOST=redis-server
     depends_on:
       - discovery-service
       - order-database
+      - redis-server
     expose:
       - 8080
 
@@ -59,8 +62,9 @@ services:
 
   redis-server:
     image: redis
-    ports:
-      - 6379:6379
+    expose:
+      - 6379
+
 volumes:
   db:
   db2:

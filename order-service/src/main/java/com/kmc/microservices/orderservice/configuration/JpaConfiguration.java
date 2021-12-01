@@ -1,8 +1,10 @@
 package com.kmc.microservices.orderservice.configuration;
 
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@EnableJpaRepositories
+@EnableTransactionManagement
+@Configuration
 public class JpaConfiguration {
 
 }

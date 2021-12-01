@@ -14,6 +14,7 @@ public class OrdersClientFallback implements OrdersClient {
 	@Autowired
 	private RedisCacheManager cacheManager;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<OrderDto> getOrders(Long customerId) {
 		return (List<OrderDto>) cacheManager.getCache("customer-orders").get(customerId).get();

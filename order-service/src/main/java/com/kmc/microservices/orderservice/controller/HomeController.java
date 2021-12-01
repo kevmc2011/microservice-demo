@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kmc.microservices.orderservice.domain.Order;
 import com.kmc.microservices.orderservice.projections.OrderDto;
-import com.kmc.microservices.orderservice.repository.OrderRepository;
+import com.kmc.microservices.orderservice.service.OrderService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,16 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 public class HomeController {
 
 	@Autowired
-	private OrderRepository orderRepository;
+	private OrderService orderService;
 
 	@GetMapping("/{customerId}")
 	public List<OrderDto> getAllOrders(@PathVariable Long customerId) {
-		return orderRepository.findByCustomerId(customerId);
+		return orderService.findByCustomerId(customerId);
 	}
 
 	@PostMapping("/{customerId}")
-	public Order addOrderForCustomer(@PathVariable Long customerId, @RequestBody Order order) {
+	public OrderDto addOrderForCustomer(@PathVariable Long customerId, @RequestBody OrderDto order) {
 		log.info("Saving new customer [{}]", order);
-		return orderRepository.save(order);
+		return orderService.save(order);
 	}
 }
